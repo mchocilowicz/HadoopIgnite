@@ -1,0 +1,8 @@
+---
+- name: Install apache as loadbalancer
+  hosts: loadbalancer
+  remote_user: vagrant
+  sudo: yes
+  roles:
+    - apache
+

@@ -1,0 +1,58 @@
+---
+
+- name: Install maven
+  apt: name=maven state=present 
+
+- name: Move Java Code 
+  command: sudo mv /home/vagrant/cache {{local_dest}}
+
+- name: download apache tomcat
+  get_url: url=http://www-eu.apache.org/dist/tomcat/tomcat-7/v7.0.73/bin/apache-tomcat-7.0.73.tar.gz dest=/usr/local/apache-tomcat-7.0.73.tar.gz
+ 
+- name: extract the tomcat file
+  unarchive: src=/usr/local/apache-tomcat-7.0.73.tar.gz dest=/usr/local/ creates=/usr/local/apache-tomcat-7.0.73 copy=no owner={{ app_user }} group={{ app_group }} mode=0744
+
+- name: make second tomcat instance
+  shell: cp -r /usr/local/apache-tomcat-7.0.73 /usr/local/apache-tomcat-7.0.73-2 creates=/usr/local/apache-tomcat-7.0.73-2
+
+- name: Fix ownership
+  file: state=directory path=/usr/local/apache-tomcat-7.0.73 owner={{ app_user }} group={{ app_group }} recurse=yes
+
+- name: Fix ownership
+  file: state=directory path=/usr/local/apache-tomcat-7.0.73-2 owner={{ app_user }} group={{ app_group }} recurse=yes
+
+- name: Compile job
+  shell: mvn clean package creates={{ local_dest }}/ignite-login-app/target/ignite-login-app.war chdir={{ local_dest }}/ignite-login-app
+
+- name: Copy war file to tomcat directory
+  shell: cp {{ local_dest }}/ignite-login-app/target/ignite-login-app.war /usr/local/apache-tomcat-7.0.73/webapps/ignite-login-app.war
+
+- name: Copy war file to tomcat directory
+  shell: cp {{ local_dest }}/ignite-login-app/target/ignite-login-app.war /usr/local/apache-tomcat-7.0.73-2/webapps/ignite-login-app.war
+
+- name: Change tomcat1 start port
+  replace: dest=/usr/local/apache-tomcat-7.0.73/conf/server.xml regexp='\\b8080\\b' replace='{{app_port1}}'
+
+- name: Change tomcat2 shutdown ports
+  replace: dest=/usr/local/apache-tomcat-7.0.73/conf/server.xml regexp='^<Server port="8005" shutdown="SHUTDOWN">' replace='<Server port="8091" shutdown="SHUTDOWN">'
+
+- name: Change tomcat2 start port
+  replace: dest=/usr/local/apache-tomcat-7.0.73-2/conf/server.xml regexp='\\b8080\\b' replace='{{app_port2}}'
+
+- lineinfile: dest=/usr/local/apache-tomcat-7.0.73/conf/tomcat-users.xml insertbefore="^</tomcat-users>" line='<role rolename="manager-gui"/>\n<user username="tomcat" password="tomcat" roles="manager-gui"/>'
+
+- lineinfile: dest=/usr/local/apache-tomcat-7.0.73-2/conf/tomcat-users.xml insertbefore="^</tomcat-users>" line='<role rolename="manager-gui"/>\n<user username="tomcat" password="tomcat" roles="manager-gui"/>'
+
+
+- name: copy tomcat upstart script
+  template: src=tomcat dest=/etc/init.d/tomcat mode=0751
+
+- name: copy tomcat2 upstart script
+  template: src=tomcat2 dest=/etc/init.d/tomcat2 mode=0751
+
+- name: Ensure first tomcat is started
+  action: service name=tomcat state=started
+
+- name: Ensure second tomcat service is started
+  action: service name=tomcat2 state=started
+

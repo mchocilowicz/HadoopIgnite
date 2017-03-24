@@ -1,0 +1,16 @@
+---
+
+- name: Install maven
+  apt: name=maven state=present 
+
+- name: Copy program file 
+  command: sudo mv /home/vagrant/hadoop {{local_dest}} 
+
+- name: Compile job
+  command: mvn clean package creates={{ local_dest }}/hadoop/target/password-entropy-app-1.3.3.RELEASE.jar chdir={{ local_dest }}/hadoop
+
+- name: upload sample password file
+  shell: /usr/local/hadoop-2.6.0/bin/hadoop fs -put {{ local_dest }}/hadoop/passwords.csv /user/vagrant/input
+
+- name: Initilize job
+  shell: nohup java -Xmx1024m -jar password-entropy-app-1.3.3.RELEASE.jar & chdir={{ local_dest }}/hadoop/target

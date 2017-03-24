@@ -1,0 +1,25 @@
+---
+ - name: Create java jvm directory
+   file: path=/usr/lib/jvm state=directory
+
+ - name: Download Java
+   command: "wget -q -O {{java_archive}} --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' {{download_url}} creates={{java_archive}}"
+
+ - name: Unpack archive
+   unarchive: src={{java_archive}} dest={{download_folder}} creates={{java_name}} copy=no
+
+ - name: Fix ownership
+   file: state=directory path={{java_name}} owner=root group=root recurse=yes
+
+ - name: Make Java available for system
+   command: update-alternatives --install "/usr/bin/java" "java" "{{java_name}}/bin/java" 1
+  
+ - name: Make Java available for system
+   command: update-alternatives --install "/usr/bin/javac" "javac" "{{java_name}}/bin/javac" 1
+ 
+ - name: Make Java available for system
+   command: update-alternatives --install "/usr/bin/javaws" "javaws" "{{java_name}}/bin/javaws" 1
+
+ - name: Make Java available for system
+   command: update-alternatives --install "/usr/bin/jps" "jps" "{{java_name}}/bin/jps" 1
+

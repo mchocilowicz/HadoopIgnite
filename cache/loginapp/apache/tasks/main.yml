@@ -1,0 +1,27 @@
+---
+
+- include: host.yml
+
+- name: Install Apache
+  apt: name=apache2 state=present update_cache=yes
+  
+- name: start apache
+  service: name=apache2 state=running 
+
+- name: backup old conf file
+  shell: cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/000-default.conf.old
+
+- name: Copy loadbalancer conf to apache
+  template: src=apache.conf dest=/etc/apache2/sites-available/000-default.conf
+
+- name: enable proxy module
+  shell: a2enmod proxy
+
+- name: enable proxy module
+  shell: a2enmod proxy_http
+
+- name: enable lbmethod_byrequests module
+  shell: a2enmod lbmethod_byrequests
+
+- name: start apache2 service
+  service: name=apache2 state=restarted

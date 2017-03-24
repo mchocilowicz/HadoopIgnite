@@ -1,0 +1,6 @@
+---
+
+ - get_url: url=https://archive.apache.org/dist/ignite/1.7.0/apache-ignite-fabric-1.7.0-bin.zip dest=/usr/local/apache-ignite-1.7.0-bin.zip
+
+ - name: extract the ignite zip file
+   unarchive: src=/usr/local/apache-ignite-1.7.0-bin.zip dest=/usr/local/ creates=/usr/local/apache-ignite-fabric-1.7.0-bin copy=no owner={{ app_user }} group={{ app_group }} mode=0744

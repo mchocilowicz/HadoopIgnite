@@ -1,0 +1,9 @@
+---
+- name: Install hadoop
+  hosts: hadoopmaster
+  remote_user: vagrant
+  sudo: yes
+  roles:
+    - java
+    - hadoop_master
+    - get-mapreduce-job

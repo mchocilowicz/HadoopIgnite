@@ -1,0 +1,86 @@
+---
+ - include: hosts.yml
+
+ - name: Generate SSH keys
+   shell: ssh-keygen -b 2048 -t rsa -f /home/{{ hadoop_user }}/.ssh/id_rsa -q -N ""
+   args:
+     creates: /home/{{ hadoop_user }}/.ssh/id_rsa
+   become_user: "{{ hadoop_user }}"
+
+ - name: Append to authorized_keys
+   shell: cat /home/{{ hadoop_user }}/.ssh/id_rsa.pub >> /home/{{ hadoop_user }}/.ssh/authorized_keys
+   become_user: "{{ hadoop_user }}"
+
+ - name: Create file
+   template: src=ssh-config dest=/home/{{ hadoop_user }}/.ssh/config owner={{ hadoop_user }} group={{ hadoop_group }} mode=664
+   
+
+ - name: download hadoop-2.6.0.tar.gz
+   get_url: url=http://mirrors.sonic.net/apache/hadoop/common/hadoop-2.6.0/hadoop-2.6.0.tar.gz dest=/usr/local/hadoop-2.6.0.tar.gz
+ 
+ - name: extract the hadoop file
+   unarchive: src=/usr/local/hadoop-2.6.0.tar.gz dest=/usr/local/ creates=/usr/local/hadoop-2.6.0 copy=no owner={{ hadoop_user }} group={{ hadoop_group }}      mode=0744
+ 
+ - name: copy the core site.xml template file
+   template: src=core-site.xml dest=/usr/local/hadoop-2.6.0/etc/hadoop
+ 
+ - name: copy the hdfs-site.xml template file
+   template: src=hdfs-site.xml dest=/usr/local/hadoop-2.6.0/etc/hadoop
+ 
+ - name: copy the hadoop-env.sh template file
+   template: src=hadoop-env.sh dest=/usr/local/hadoop-2.6.0/etc/hadoop
+ 
+ - name: copy the mapred-site.xml template file
+   template: src=mapred-site.xml dest=/usr/local/hadoop-2.6.0/etc/hadoop owner={{ hadoop_user }} group={{ hadoop_group }}
+ 
+ - name: copy the yarn-site.xml template file
+   template: src=yarn-site.xml dest=/usr/local/hadoop-2.6.0/etc/hadoop
+
+ - name: copy the slaves template file
+   template: src=slaves dest=/usr/local/hadoop-2.6.0/etc/hadoop
+
+ - name: copy the bashprofile template
+   template: src=bashprofile dest=/home/{{ hadoop_user }}/.bash_profile
+
+ - name: Creates directory
+   file: path=/app/hadoop/tmp state=directory owner={{ hadoop_user }} group={{ hadoop_group }} mode=0744 recurse=yes
+ 
+ - name: create a directory for hadoopstore
+   file: path=/usr/local/hadoop_store state=directory owner={{ hadoop_user }} group={{ hadoop_group }} mode=0744
+  
+ - name: create a directory for hadoopstore/hdfs
+   file: path=/usr/local/hadoop_store/hdfs state=directory owner={{ hadoop_user }} group={{ hadoop_group }} mode=0744
+  
+ - name: create a directory for hadoopstore/hdfs/datanode
+   file: path=/usr/local/hadoop_store/hdfs/namenode state=directory owner={{ hadoop_user }} group={{ hadoop_group }} mode=0744
+
+ - name: create a directory for hadoopstore/hdfs/datanode
+   file: path=/usr/local/hadoop_store/hdfs/datanode state=directory owner={{ hadoop_user }} group={{ hadoop_group }} mode=0744
+
+ - name: Run namenode format command
+   command: /usr/local/hadoop-2.6.0/bin/hadoop namenode -format creates=/usr/local/hadoop_store/hdfs/namenode/current
+
+ - name: Fix ownership
+   file: state=directory path=/usr/local/hadoop_store/hdfs/namenode owner={{ hadoop_user }} group={{ hadoop_group }} recurse=yes
+
+ - name: Fix hosts entry
+   lineinfile: dest=/etc/hosts regexp='127.0.1.1' state=absent
+
+
+ - name: copy dfs upstart script
+   template: src=dfs-service dest=/etc/init.d/hadoop-dfs mode=0751
+
+ - name: copy yarn upstart script
+   template: src=yarn-service dest=/etc/init.d/hadoop-yarn mode=0751
+
+ - name: Ensure hadoop dfs is started
+   action: service name=hadoop-dfs state=started
+
+ - name: Ensure yarn service is started
+   action: service name=hadoop-yarn state=started
+
+ - name: create input directory on hdfs
+   command: /usr/local/hadoop-2.6.0/bin/hadoop fs -mkdir -p /user/vagrant/input
+
+ - name: create output directory on hdfs
+   command: /usr/local/hadoop-2.6.0/bin/hadoop fs -mkdir -p /user/vagrant/output

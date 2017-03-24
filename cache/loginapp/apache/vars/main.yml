@@ -1,0 +1,6 @@
+---
+
+appserver1: 199.168.1.51
+app_port1: 8080
+app_port2: 8090
+appserver2: 199.168.1.52

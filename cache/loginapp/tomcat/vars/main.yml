@@ -1,0 +1,7 @@
+---
+
+local_dest: /usr/local/ignitejob
+app_user: vagrant
+app_group: vagrant
+app_port1: 8080
+app_port2: 8090

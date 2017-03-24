@@ -1,0 +1,19 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Results</title>
+</head>
+<body>
+	<table border='1' style="border-collapse: collapse;" width='30%' align='center'
+		cellspacing='5' cellpadding='5'>
+		<tr style="background: gray;">
+			<td>Password</td>
+			<td>Entropy</td>
+		</tr>
+		<tr th:each="res : ${results}">
+			<td th:text="${res.password}"></td>
+			<td><span th:text="${res.strength}"></span>%</td>
+		</tr>
+	</table>
+</body>
+</html>

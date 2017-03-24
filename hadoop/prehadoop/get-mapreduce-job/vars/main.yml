@@ -1,0 +1,6 @@
+---
+
+local_dest: /usr/local/mapreducejob
+branch: hadoop
+hadoop_user: vagrant
+hadoop_group: vagrant

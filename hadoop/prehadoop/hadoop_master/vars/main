@@ -1,0 +1,8 @@
+---
+ hostname_master: hadoopmaster
+ hostname_slave: hadoopmaster
+ hadoop_user: vagrant
+ hadoop_group: vagrant
+ hadoopmaster_ip: 188.168.1.78
+ hadoopslave_ip: 188.168.1.78
+ 

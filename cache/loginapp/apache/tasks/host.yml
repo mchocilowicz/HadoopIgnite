@@ -1,0 +1,6 @@
+---
+ - name: add the aapserver1 host file entry
+   lineinfile: dest=/etc/hosts line='{{ appserver1 }} appserver1' owner=root group=root mode=0644
+
+ - name: add the appserver2 host file entry
+   lineinfile: dest=/etc/hosts line='{{ appserver2 }} appserver2' owner=root group=root mode=0644

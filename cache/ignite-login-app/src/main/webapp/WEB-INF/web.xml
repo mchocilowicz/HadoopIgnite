@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" 
+   metadata-complete="true"
+xmlns="http://java.sun.com/xml/ns/javaee"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+  <servlet>
+    <servlet-name>sample</servlet-name>
+    <servlet-class>
+        org.springframework.web.servlet.DispatcherServlet
+    </servlet-class>
+    <init-param>
+      <param-name>contextClass</param-name>
+      <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+    </init-param>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>com.ignite.loginapp.configuration</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>sample</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+  <listener>
+   <listener-class>org.apache.ignite.startup.servlet.ServletContextListenerStartup</listener-class>
+</listener> 
+
+ <filter>
+	<filter-name>loginFilter</filter-name>
+	<filter-class>com.ignite.loginapp.filter.LoginFilter</filter-class>
+</filter> 
+ <filter-mapping>
+	<filter-name>loginFilter</filter-name>
+	<url-pattern>/login</url-pattern>
+</filter-mapping> 
+<filter>
+	<filter-name>loginCheckFilter</filter-name>
+	<filter-class>com.ignite.loginapp.filter.LoginCheckFilter</filter-class>
+</filter>
+<filter-mapping>
+	<filter-name>loginCheckFilter</filter-name>
+	<url-pattern>/home</url-pattern>
+</filter-mapping>
+
+<filter>
+   <filter-name>IgniteWebSessionsFilter</filter-name>
+   <filter-class>org.apache.ignite.cache.websession.WebSessionFilter</filter-class>
+</filter>
+<filter-mapping>
+   <filter-name>IgniteWebSessionsFilter</filter-name>
+   <url-pattern>/*</url-pattern>
+</filter-mapping>
+ <context-param>
+   <param-name>IgniteConfigurationFilePath</param-name>
+   <param-value>config/default-config.xml</param-value>
+</context-param> 
+<context-param>
+   <param-name>IgniteWebSessionsCacheName</param-name>
+   <param-value>replicated</param-value>
+</context-param>  
+</web-app>

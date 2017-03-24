@@ -1,0 +1,24 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+Vagrant.configure(2) do |config|
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+
+  config.vm.define "hadoopmaster" do |controller_vagrant|
+  controller_vagrant.vm.box = "ubuntu14"
+  controller_vagrant.vm.box_url = "https://github.com/kraksoft/vagrant-box-ubuntu/releases/download/14.04/ubuntu-14.04-amd64.box"
+  controller_vagrant.vm.network "private_network", ip: "188.168.1.78"
+  controller_vagrant.vm.hostname = "hadoopmaster"
+  controller_vagrant.vm.network "forwarded_port", guest: 8182, host: 8182
+  controller_vagrant.vm.network "forwarded_port", guest: 8088, host: 8088
+  controller_vagrant.vm.network "forwarded_port", guest: 50070, host: 50070
+  controller_vagrant.vm.provision "file" , source: "../../hadoop", destination: "hadoop"
+  controller_vagrant.vm.provision "ansible" do |ansible|
+      ansible.playbook = "hadoopmaster.yml"
+    end
+  end
+
+end
+

@@ -1,0 +1,10 @@
+---
+- name: Setup app server
+  hosts: "{{ hostname }}"
+  remote_user: vagrant
+  sudo: yes
+  roles:
+    - java
+    - tomcat
+    - ignite
+

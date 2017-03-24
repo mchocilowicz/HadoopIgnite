@@ -1,0 +1,51 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+Vagrant.configure(2) do |config|
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+
+  config.vm.define "loadbalancer" do |apache2_vagrant|
+  apache2_vagrant.vm.box = "ubuntu14"
+  apache2_vagrant.vm.box_url = "https://github.com/kraksoft/vagrant-box-ubuntu/releases/download/14.04/ubuntu-14.04-amd64.box"
+  apache2_vagrant.vm.network "private_network", ip: "199.168.1.50"
+  apache2_vagrant.vm.hostname = "loadbalancer"
+  apache2_vagrant.vm.network "forwarded_port", guest: 80, host: 80
+  apache2_vagrant.vm.provision "ansible" do |ansible|
+      ansible.playbook = "apache.yml"
+    end
+  end
+
+  config.vm.define "ignite1" do |tomcat7_vagrant|
+  tomcat7_vagrant.vm.box = "ubuntu14"
+  tomcat7_vagrant.vm.network "private_network", ip: "199.168.1.51"
+  tomcat7_vagrant.vm.hostname = "ignite1"
+  tomcat7_vagrant.vm.network "forwarded_port", guest: 8080, host: 8080
+  tomcat7_vagrant.vm.network "forwarded_port", guest: 8090, host: 8082
+  tomcat7_vagrant.vm.provision "file" , source: "../../cache", destination: "cache"
+  tomcat7_vagrant.vm.provision "ansible" do |ansible|
+      ansible.playbook = "appserver.yml"
+      ansible.extra_vars = {
+        hostname: "ignite1"
+      }
+    end
+  end
+
+  config.vm.define "ignite2" do |tomcat7_vagrant|
+  tomcat7_vagrant.vm.box = "ubuntu14"
+  tomcat7_vagrant.vm.network "private_network", ip: "199.168.1.52"
+  tomcat7_vagrant.vm.hostname = "ignite2"
+  tomcat7_vagrant.vm.network "forwarded_port", guest: 8080, host: 9080
+  tomcat7_vagrant.vm.network "forwarded_port", guest: 8090, host: 9081
+  tomcat7_vagrant.vm.provision "file" , source: "../../cache", destination: "cache"
+  tomcat7_vagrant.vm.provision "ansible" do |ansible|
+      ansible.playbook = "appserver.yml"
+      ansible.extra_vars = {
+        hostname: "ignite2"
+      }
+    end
+  end
+
+end
+
